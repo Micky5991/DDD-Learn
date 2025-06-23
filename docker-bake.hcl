@@ -20,20 +20,22 @@ variable "REGISTRY" {
 
 function "get_tags" {
   params = [service]
-  result = compact([
-    # Main tag: always present
-    "${REGISTRY}/${REPOSITORY}${service != "" ? "/${service}" : ""}:${
-      TAG != "" ? TAG :
-      PR != "" ? "pr-${PR}" :
-      "preview-${BRANCH}"
-    }",
+  result = [
+    for tag in compact([
+      # Main tag: always present
+      "${REGISTRY}/${REPOSITORY}${service != "" ? "/${service}" : ""}:${
+        TAG != "" ? TAG :
+        PR != "" ? "pr-${PR}" :
+        "preview-${BRANCH}"
+      }",
 
-    # Latest tag: only for release tags
-    TAG != "" ? "${REGISTRY}/${REPOSITORY}${service != "" ? "/${service}" : ""}:latest" : "",
+      # Latest tag: only for release tags
+        TAG != "" ? "${REGISTRY}/${REPOSITORY}${service != "" ? "/${service}" : ""}:latest" : "",
 
-    # Edge tag: only for main branch builds (without tag)
-    BRANCH == "main" && TAG == "" ? "${REGISTRY}/${REPOSITORY}${service != "" ? "/${service}" : ""}:edge" : ""
-  ])
+      # Edge tag: only for main branch builds (without tag)
+        BRANCH == "main" && TAG == "" ? "${REGISTRY}/${REPOSITORY}${service != "" ? "/${service}" : ""}:edge" : ""
+    ]) : lower(tag)
+  ]
 }
 
 group "default" {
