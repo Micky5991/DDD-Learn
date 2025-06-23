@@ -12,10 +12,13 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
 COPY ["Library/Library.csproj", "Library/"]
+COPY ["Library.Contracts/Library.Contracts.csproj", "Library.Contracts/"]
+COPY ["global.json", "global.json"]
 RUN --mount=type=cache,target=/root/.nuget/packages \
     --mount=type=cache,target=/root/.local/share/NuGet/http-cache \
     --mount=type=cache,target=/root/.local/share/NuGet/plugin-cache \
-    --mount=type=cache,target=/tmp/NuGetScratchroot \dotnet restore "Library/Library.csproj"
+    --mount=type=cache,target=/tmp/NuGetScratchroot \
+    dotnet restore "Library/Library.csproj"
 
 COPY . .
 
