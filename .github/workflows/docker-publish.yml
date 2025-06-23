@@ -63,5 +63,8 @@ jobs:
             *.cache-from=type=gha
             *.cache-to=type=gha,mode=max
         env:
-          VERSION: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
+          TAG: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
+          BRANCH: ${{ github.ref_name }}
+          PR: ${{ github.event_name == 'pull_request' && github.event.number || '' }}
           REPOSITORY: ${{ env.IMAGE_NAME }}
+          REGISTRY: ${{ env.REGISTRY }}

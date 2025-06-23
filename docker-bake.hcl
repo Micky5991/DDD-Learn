@@ -1,9 +1,39 @@
-variable "VERSION" {
-  default = "dev"
+variable "TAG" {
+  default = ""
+}
+
+variable "BRANCH" {
+  default = ""
+}
+
+variable "PR" {
+  default = ""
 }
 
 variable "REPOSITORY" {
-  default = "docker.micky5991.dev/ddd-learn"
+  default = "ddd-learn"
+}
+
+variable "REGISTRY" {
+  default = "docker.micky5991.dev"
+}
+
+function "get_tags" {
+  params = [service]
+  result = compact([
+    # Main tag: always present
+    "${REGISTRY}/${REPOSITORY}${service != "" ? "/${service}" : ""}:${
+      TAG != "" ? TAG :
+      PR != "" ? "pr-${PR}" :
+      "preview-${BRANCH}"
+    }",
+
+    # Latest tag: only for release tags
+    TAG != "" ? "${REGISTRY}/${REPOSITORY}${service != "" ? "/${service}" : ""}:latest" : "",
+
+    # Edge tag: only for main branch builds (without tag)
+    BRANCH == "main" && TAG == "" ? "${REGISTRY}/${REPOSITORY}${service != "" ? "/${service}" : ""}:edge" : ""
+  ])
 }
 
 group "default" {
@@ -23,9 +53,7 @@ target "webapp" {
 
 target "webapp-release" {
   inherits = ["webapp"]
-  tags = [
-    "${REPOSITORY}/webapp:${VERSION}"
-  ]
+  tags = get_tags("web")
   output = [
     "type=registry"
   ]
